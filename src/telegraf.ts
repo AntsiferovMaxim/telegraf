@@ -92,7 +92,7 @@ export class Telegraf<C extends Context = Context> extends Composer<C> {
   private polling?: Polling
   /** Set manually to avoid implicit `getMe` call in `launch` or `webhookCallback` */
   public botInfo?: tg.UserFromGetMe
-  public telegram: Telegram
+  public telegram!: Telegram
   readonly context: Partial<C> = {}
 
   /** Assign to this to customise the webhook filter middleware.
@@ -131,15 +131,17 @@ export class Telegraf<C extends Context = Context> extends Composer<C> {
     throw err
   }
 
-  constructor(token: string, options?: Partial<Telegraf.Options<C>>) {
+  constructor(token?: string, options?: Partial<Telegraf.Options<C>>) {
     super()
     // @ts-expect-error Trust me, TS
     this.options = {
       ...DEFAULT_OPTIONS,
       ...compactOptions(options),
     }
-    this.telegram = new Telegram(token, this.options.telegram)
-    debug('Created a `Telegraf` instance')
+    if (token) {
+      this.telegram = new Telegram(token, this.options.telegram)
+      debug('Created a `Telegraf` instance')
+    }
   }
 
   private get token() {
