@@ -307,6 +307,13 @@ export class Telegraf<C extends Context = Context> extends Composer<C> {
     webhookResponse?: http.ServerResponse,
     bot?: { token: string }
   ) {
+    const token = bot?.token ?? this.telegram.token
+    const tg = new Telegram(token, this.telegram?.options, webhookResponse)
+
+    if (!this.telegram) {
+      this.telegram = tg
+    }
+
     this.botInfo ??=
       (debug(
         'Update %d is waiting for `botInfo` to be initialized',
@@ -314,9 +321,6 @@ export class Telegraf<C extends Context = Context> extends Composer<C> {
       ),
       await (this.botInfoCall ??= this.telegram.getMe()))
     debug('Processing update', update.update_id)
-    const token = bot?.token ?? this.telegram.token
-
-    const tg = new Telegram(token, this.telegram.options, webhookResponse)
     const TelegrafContext = this.options.contextType
     const ctx = new TelegrafContext(update, tg, this.botInfo)
     Object.assign(ctx, this.context)
